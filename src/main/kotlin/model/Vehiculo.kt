@@ -1,13 +1,19 @@
 package model
 
+import java.util.Locale
+
+//creo la clase padre para las herencias
 abstract class Vehiculo (
     val patente: String,
     val fecha: String,
     val marca: String,
     val tipoCliente: TipoCliente
 ){
-    abstract fun obtenerTarifa(minutos: Int)
+    abstract fun obtenerTarifa(minutos: Int): Double
+
+    fun formatear(monto: Double): String = String.format(Locale.US, "%.2f", monto)
 }
+//Sealed class por los tipos de cliente
 sealed class TipoCliente(){
     object Regular : TipoCliente()
     object Abonado : TipoCliente()
@@ -19,10 +25,11 @@ class Particular(
     fecha: String,
     tipoCliente: TipoCliente
     //herencia;
-): Vehiculo(patente, marca, fecha, tipoCliente)
+): Vehiculo(patente, fecha, marca, tipoCliente)
 {
-    override fun obtenerTarifa(minutos: Int) {
-        var total = 1500 * minutos /60.0
+    //funcion para obtener tarifa mediante iva
+    override fun obtenerTarifa(minutos: Int): Double {
+        var total = 1500 * minutos / 60.0
         var iva = 0.19
         if(tipoCliente == TipoCliente.Abonado){
             total *= 0.8
@@ -31,9 +38,10 @@ class Particular(
             iva = 0.19 / 2
         }
         total *= (1 + iva)
-        println("La tarfia por $minutos de un particular es de $${String.format("%.2f", total)}")
+        return total
     }
 }
+//clase hija:
 class Moto(
     patente: String,
     fecha: String,
@@ -41,21 +49,21 @@ class Moto(
     tipoCliente: TipoCliente
     //herencia
 ): Vehiculo(patente, fecha, marca, tipoCliente){
-
-    override fun obtenerTarifa(minutos: Int) {
+    //funcion para obtener tarifa mediante iva
+    override fun obtenerTarifa(minutos: Int): Double {
         var total = 800 * minutos / 60.0
         var iva = 0.19
-        if(minutos<15){
+        if(minutos < 15){
             total = 0.0
         }
         if(tipoCliente == TipoCliente.Discapacitado){
             iva = 0.19 / 2
         }
         total *= (1 + iva)
-        println("La tarifa por $minutos minutos de una Moto es de $${String.format("%.2f", total)}")
+        return total
     }
 }
-
+//clase hija
 class Camioneta(
     patente: String,
     fecha: String,
@@ -64,7 +72,8 @@ class Camioneta(
     tipoCliente: TipoCliente
 //herencia
 ): Vehiculo(patente, fecha, marca, tipoCliente){
-    override fun obtenerTarifa(minutos: Int) {
+    //funcion para obtener tarifa mediante iva
+    override fun obtenerTarifa(minutos: Int): Double {
         var total = 2500 * minutos / 60.0
         var iva = 0.19
         if(cargaPesada){
@@ -74,6 +83,6 @@ class Camioneta(
             iva = 0.19 / 2
         }
         total *= (1 + iva)
-        println("La tarifa por $minutos $minutos de una Moto es de ${String.format("%.2f", total)}")
+        return total
     }
 }
