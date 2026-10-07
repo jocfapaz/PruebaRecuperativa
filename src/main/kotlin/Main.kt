@@ -18,7 +18,7 @@ suspend fun main() = coroutineScope {
         gestor.registrarIngreso(moto)
         gestor.registrarSalida(2, 20)
         gestor.registrarIngreso(camioneta)
-        gestor.registrarSalida(3, 20)
+        gestor.registrarSalida(2, 20)
     }
     catch (ex: Exception) {
         println("ERROR: ${ex.message}")

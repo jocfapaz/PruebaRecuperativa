@@ -16,6 +16,10 @@ dependencies {
 
 }
 
+application {
+    mainClass.set("MainKt")
+}
+
 tasks.test {
     useJUnitPlatform()
 }

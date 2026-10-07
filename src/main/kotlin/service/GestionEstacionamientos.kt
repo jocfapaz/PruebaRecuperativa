@@ -26,9 +26,15 @@ class GestionEstacionamientos {
     suspend fun registrarIngreso(vehiculo: Vehiculo){
         println("Intento de registrar ingreso del vehículo ${vehiculo.patente}")
         val estacionamientoLibre = mutex.withLock {
-            val libre = estacionamientos.find { it.estado == Estado.Libre } ?: return
-            libre.estado = Estado.Procesando
+            val libre = estacionamientos.find { it.estado == Estado.Libre }
+            if(libre != null){
+                libre.estado = Estado.Procesando
+            }
             libre
+        }
+        if(estacionamientoLibre == null){
+            println("[ERROR] No hay estacionamientos libres.")
+            return
         }
         delay(1000)
         estacionamientoLibre.estado = Estado.Ocupado
@@ -39,24 +45,29 @@ class GestionEstacionamientos {
     }
     suspend fun registrarSalida(numero: Int, minutos: Int){
         println("Intento de registrar salida estacionamiento número $numero")
-        val estacionamientoQueSale = estacionamientos.find {it.numero == numero}
-        if(estacionamientoQueSale == null){
-            println("[ERROR] No existe un estacionamiento con este número.")
-            return
-        }
-        if(estacionamientoQueSale.estado != Estado.Ocupado){
-            println("[ERROR] El estacionamiento número $numero no está ocupado.")
-            return
+        val estacionamientoQueSale = mutex.withLock {
+            val est = estacionamientos.find {it.numero == numero}
+            if(est == null){
+                println("[ERROR] No existe un estacionamiento con este número.")
+                return
+            }
+            if(est.estado != Estado.Ocupado){
+                println("[ERROR] El estacionamiento número $numero no está ocupado.")
+                return
+            }
+            est.estado = Estado.Procesando
+            est
         }
         val vehiculoQueSale = estacionamientoQueSale.vehiculo
-        estacionamientoQueSale.estado = Estado.Procesando
         delay(3000)
         val tarifa = vehiculoQueSale?.obtenerTarifa(minutos) ?: 0.0
         if(vehiculoQueSale != null){
             println("La tarifa por $minutos minutos de ${vehiculoQueSale.marca} ${vehiculoQueSale.patente} es de ${vehiculoQueSale.formatear(tarifa)}")
         }
-        estacionamientoQueSale.vehiculo = null
-        estacionamientoQueSale.estado = Estado.Libre
+        mutex.withLock {
+            estacionamientoQueSale.vehiculo = null
+            estacionamientoQueSale.estado = Estado.Libre
+        }
         println("Número ${numero} salió satisfactoriamente")
         ver()
     }

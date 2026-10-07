@@ -44,8 +44,8 @@ class Particular(
 //clase hija:
 class Moto(
     patente: String,
-    fecha: String,
     marca: String,
+    fecha: String,
     tipoCliente: TipoCliente
     //herencia
 ): Vehiculo(patente, fecha, marca, tipoCliente){
